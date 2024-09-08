@@ -20,3 +20,7 @@ jobs:
           export TRITON_PLUGIN_DIRS=$(pwd)
           cd triton/python
           python3 -m pip install -e .
+      - name: Verify installation
+        run: |
+          cd triton/python
+          python3 -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'

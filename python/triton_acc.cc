@@ -2,4 +2,4 @@
 
 namespace py = pybind11;
 
-void init_triton_triton_acc(py::module &&m) {}
+void init_triton_acc(py::module &&m) {}
