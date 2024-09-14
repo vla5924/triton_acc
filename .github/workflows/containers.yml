@@ -1,4 +1,4 @@
-name: Publish CI containers
+name: Containers
 
 on:
   workflow_dispatch:
