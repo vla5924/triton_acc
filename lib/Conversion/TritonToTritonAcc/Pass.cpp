@@ -16,7 +16,7 @@ class ConvertTritonToTritonAcc
 public:
   ConvertTritonToTritonAcc() = default;
 
-  void runOnOperation() override{}
+  void runOnOperation() override {}
 };
 
 } // namespace
