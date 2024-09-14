@@ -65,7 +65,7 @@ jobs:
           name: wheels-${{ matrix.python }}
       - name: Install a wheel
         run: |
-          ${{ matrix.python }} -m pip install "$(ls -tr *.toml | head -1).whl"
+          ${{ matrix.python }} -m pip install "$(ls -tr *.whl | head -1)"
       - name: Verify installation
         run: |
           ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
