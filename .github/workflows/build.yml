@@ -58,7 +58,7 @@ jobs:
           submodules: true
       - name: Build as an editable package
         env:
-          TRITON_PLUGIN_DIRS: $GITHUB_WORKSPACE
+          TRITON_PLUGIN_DIRS: ${{ github.workspace }}
           TRITON_BUILD_WITH_CLANG_LLD: "true"
           TRITON_BUILD_WITH_CCACHE: "true"
         run: |
