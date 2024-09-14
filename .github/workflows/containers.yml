@@ -1,0 +1,38 @@
+name: Deploy supplementary containers
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - dokerfail # TODO: remove
+    paths:
+      - '.github/docker/**'
+      - '.github/workflows/containers.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy-build-image:
+    name: Deploy triton_acc/build:latest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Initialize a repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: '.github/docker'
+          submodules: false
+      - name: Define variables
+        id: vars
+        run: |
+          image_name="ghcr.io/$GITHUB_REPOSITORY/build"
+          tag="latest"
+          echo "image-name-tag=$image_name:$tag" >> $GITHUB_OUTPUT
+      - name: Build an image
+        run: docker build -t ${{ steps.vars.outputs.image-name-tag }} -f .github/docker/build.Dockerfile .
+      - name: Login to the registry
+        run: docker login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
+      - name: Push an image
+        run: docker push ${{ steps.vars.outputs.image-name-tag }}
