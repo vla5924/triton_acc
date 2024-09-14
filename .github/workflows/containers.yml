@@ -1,7 +1,13 @@
-name: Deploy supplementary containers
+name: Publish CI containers
 
 on:
   workflow_dispatch:
+    inputs:
+      deploy-build-image:
+        description: Deploy triton_acc/build:latest
+        type: boolean
+        required: true
+        default: false
   push:
     branches:
       - main
@@ -18,6 +24,7 @@ jobs:
   deploy-build-image:
     name: Deploy triton_acc/build:latest
     runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.deploy-build-image == true }}
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
@@ -27,7 +34,7 @@ jobs:
       - name: Define variables
         id: vars
         run: |
-          image_name="ghcr.io/$GITHUB_REPOSITORY/build"
+          image_name="ghcr.io/${{ github.repository }}/build"
           tag="latest"
           echo "image-name-tag=$image_name:$tag" >> $GITHUB_OUTPUT
       - name: Build an image

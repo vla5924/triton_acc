@@ -1,5 +1,6 @@
 # This image shall be used for building Triton packages in CI environment
 # Canonical URL: ghcr.io/ML-acc/triton_acc/build:latest
+# GitHub workflow expression: ghcr.io/$GITHUB_REPOSITORY/build:latest
 
 FROM quay.io/pypa/manylinux_2_28_x86_64
 

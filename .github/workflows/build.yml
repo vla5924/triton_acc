@@ -1,23 +1,61 @@
 name: Build
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: read
 
 jobs:
   ubuntu-gcc-build:
+    name: Build on Ubuntu with GCC
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/build:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Initialize a repository
+        uses: actions/checkout@v4
         with:
           submodules: true
-          fetch-depth: 0
-      - name: Setup environment
+      - name: Build as an editable package
+        env:
+          TRITON_PLUGIN_DIRS: $GITHUB_WORKSPACE
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y ccache clang lld python3 python3-pip
-          python3 -m pip install --upgrade pip
-          python3 -m pip install cmake ninja wheel pybind11
-      - name: Build
+          cd triton/python
+          python3 -m pip install -e .
+      - name: Verify installation
         run: |
-          export TRITON_PLUGIN_DIRS=$(pwd)
+          cd triton/python
+          python3 -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
+
+  ubuntu-clang-build:
+    name: Build on Ubuntu with Clang and ccache
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/build:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+    steps:
+      - name: Initialize a repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build as an editable package
+        env:
+          TRITON_PLUGIN_DIRS: $GITHUB_WORKSPACE
+          TRITON_BUILD_WITH_CLANG_LLD: "true"
+          TRITON_BUILD_WITH_CCACHE: "true"
+        run: |
           cd triton/python
           python3 -m pip install -e .
       - name: Verify installation
