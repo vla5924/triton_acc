@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   ubuntu-gcc-build:
-    name: Build on Ubuntu with GCC
+    name: Build on Ubuntu GCC
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository }}/build:latest
@@ -23,7 +23,7 @@ jobs:
         password: ${{ github.token }}
     strategy:
       matrix:
-        python: ["3.8", "3.10", "3.12"]
+        python: ["python3.8", "python3.10", "python3.12"]
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
@@ -41,7 +41,7 @@ jobs:
           ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
 
   ubuntu-clang-build:
-    name: Build on Ubuntu with Clang and ccache
+    name: Build on Ubuntu Clang
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository }}/build:latest
@@ -50,7 +50,7 @@ jobs:
         password: ${{ github.token }}
     strategy:
       matrix:
-        python: ["3.8", "3.10", "3.12"]
+        python: ["python3.8", "python3.10", "python3.12"]
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
