@@ -1,4 +1,4 @@
-name: Build
+name: Build and install
 
 on:
   push:
@@ -14,16 +14,13 @@ permissions:
 
 jobs:
   ubuntu-gcc-build:
-    name: Build on Ubuntu GCC
+    name: Ubuntu GCC
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository }}/build:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ github.token }}
-    strategy:
-      matrix:
-        python: ["python3.8", "python3.10", "python3.12"]
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
@@ -31,26 +28,23 @@ jobs:
           submodules: true
       - name: Build as an editable package
         env:
-          TRITON_PLUGIN_DIRS: $GITHUB_WORKSPACE
+          TRITON_PLUGIN_DIRS: ${{ github.workspace }}
         run: |
           cd triton/python
-          ${{ matrix.python }} -m pip install -e .
+          python3.10 -m pip install -e .
       - name: Verify installation
         run: |
           cd triton/python
-          ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
+          python3.10 -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
 
   ubuntu-clang-build:
-    name: Build on Ubuntu Clang
+    name: Ubuntu Clang with ccache
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository }}/build:latest
       credentials:
         username: ${{ github.actor }}
         password: ${{ github.token }}
-    strategy:
-      matrix:
-        python: ["python3.8", "python3.10", "python3.12"]
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
@@ -63,8 +57,8 @@ jobs:
           TRITON_BUILD_WITH_CCACHE: "true"
         run: |
           cd triton/python
-          ${{ matrix.python }} -m pip install -e .
+          python3.10 -m pip install -e .
       - name: Verify installation
         run: |
           cd triton/python
-          ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
+          python3.10 -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
