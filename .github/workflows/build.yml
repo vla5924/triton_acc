@@ -21,6 +21,9 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ github.token }}
+    strategy:
+      matrix:
+        python: ["3.8", "3.10", "3.12"]
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
@@ -31,11 +34,11 @@ jobs:
           TRITON_PLUGIN_DIRS: $GITHUB_WORKSPACE
         run: |
           cd triton/python
-          python3 -m pip install -e .
+          ${{ matrix.python }} -m pip install -e .
       - name: Verify installation
         run: |
           cd triton/python
-          python3 -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
+          ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
 
   ubuntu-clang-build:
     name: Build on Ubuntu with Clang and ccache
@@ -45,6 +48,9 @@ jobs:
       credentials:
         username: ${{ github.actor }}
         password: ${{ github.token }}
+    strategy:
+      matrix:
+        python: ["3.8", "3.10", "3.12"]
     steps:
       - name: Initialize a repository
         uses: actions/checkout@v4
@@ -57,8 +63,8 @@ jobs:
           TRITON_BUILD_WITH_CCACHE: "true"
         run: |
           cd triton/python
-          python3 -m pip install -e .
+          ${{ matrix.python }} -m pip install -e .
       - name: Verify installation
         run: |
           cd triton/python
-          python3 -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'
+          ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'

@@ -36,7 +36,7 @@ jobs:
         run: |
           image_name="ghcr.io/${{ github.repository }}/build"
           tag="latest"
-          echo "image-name-tag=$image_name:$tag" >> $GITHUB_OUTPUT
+          echo "image-name-tag=$image_name:$tag" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
       - name: Build an image
         run: docker build -t ${{ steps.vars.outputs.image-name-tag }} -f .github/docker/build.Dockerfile .
       - name: Login to the registry
