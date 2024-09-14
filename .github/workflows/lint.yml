@@ -3,7 +3,7 @@ on: [push, pull_request]
 
 jobs:
   py-check-ruff:
-    name: Lint with ruff
+    name: Python / ruff
     runs-on: ubuntu-latest
     steps:
       - name: Initialize a repository
@@ -16,7 +16,7 @@ jobs:
           python3 -m ruff check .
 
   py-check-yapf:
-    name: Check formatting with yapf
+    name: Python / yapf
     runs-on: ubuntu-latest
     steps:
       - name: Initialize a repository
@@ -35,7 +35,7 @@ jobs:
           git diff --exit-code
 
   cpp-clang-format:
-    name: Check formatting with clang-format
+    name: C++ / clang-format
     runs-on: ubuntu-latest
     steps:
     - name: Initialize a repository
