@@ -1,0 +1,71 @@
+name: Wheels
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  build:
+    name: Build on Ubuntu Clang
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/build:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+    strategy:
+      matrix:
+        python: ["python3.8", "python3.10", "python3.12"]
+    env:
+      WHEEL_DIR: ${{ github.workspace }}/wheels
+    steps:
+      - name: Initialize a repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build as an editable package
+        env:
+          TRITON_PLUGIN_DIRS: ${{ github.workspace }}
+          TRITON_BUILD_WITH_CLANG_LLD: "true"
+          TRITON_BUILD_WITH_CCACHE: "true"
+        run: |
+          mkdir -p $WHEEL_DIR
+          cd triton/python
+          ${{ matrix.python }} -m pip wheel --no-deps --wheel-dir $WHEEL_DIR .
+      - name: Upload a wheel
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.python }}
+          path: ${{ env.WHEEL_DIR }}/*.whl
+
+  verify:
+    name: Verify installation
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository }}/build:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+    strategy:
+      matrix:
+        python: ["python3.8", "python3.10", "python3.12"]
+    needs: build
+    steps:
+      - name: Download wheels
+        uses: actions/download-artifact@v4
+        with:
+          name: wheels-${{ matrix.python }}
+      - name: Install a wheel
+        run: |
+          ${{ matrix.python }} -m pip install "$(ls -tr *.whl | head -1)"
+      - name: Verify installation
+        run: |
+          ${{ matrix.python }} -c 'import triton; triton.runtime.driver.set_active(triton.backends.backends["acc"].driver())'

@@ -1,0 +1,44 @@
+name: Containers
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy-build-image:
+        description: Deploy triton_acc/build:latest
+        type: boolean
+        required: true
+        default: false
+  push:
+    branches:
+      - main
+      - dokerfail # TODO: remove
+    paths:
+      - '.github/docker/**'
+      - '.github/workflows/containers.yml'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy-build-image:
+    name: Deploy triton_acc/build:latest
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.deploy-build-image == true }}
+    steps:
+      - name: Initialize a repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: '.github/docker'
+      - name: Define variables
+        id: vars
+        run: |
+          image_name="ghcr.io/${{ github.repository }}/build"
+          tag="latest"
+          echo "image-name-tag=$image_name:$tag" | tr '[:upper:]' '[:lower:]' >> $GITHUB_OUTPUT
+      - name: Build an image
+        run: docker build -t ${{ steps.vars.outputs.image-name-tag }} -f .github/docker/build.Dockerfile .
+      - name: Login to the registry
+        run: docker login -u ${{ github.actor }} -p ${{ github.token }} ghcr.io
+      - name: Push an image
+        run: docker push ${{ steps.vars.outputs.image-name-tag }}
