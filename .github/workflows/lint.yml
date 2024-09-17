@@ -43,5 +43,5 @@ jobs:
     - name: Run clang-format
       uses: DoozyX/clang-format-lint-action@v0.17
       with:
-        source: 'include lib python'
         clangFormatVersion: 17
+        extensions: 'c,h,cpp,hpp,cc'
