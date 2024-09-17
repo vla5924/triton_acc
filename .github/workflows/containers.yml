@@ -30,7 +30,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           sparse-checkout: '.github/docker'
-          submodules: false
       - name: Define variables
         id: vars
         run: |
